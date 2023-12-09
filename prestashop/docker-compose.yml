@@ -1,0 +1,59 @@
+# Copyright VMware, Inc.
+# SPDX-License-Identifier: APACHE-2.0
+
+version: '2'
+services:
+  mariadb:
+    container_name: mariadbPepe
+    image: docker.io/bitnami/mariadb:11.1
+    environment:
+      - MARIADB_ROOT_PASSWORD=PEPE
+      - MARIADB_PASSWORD=PEPE
+      - MARIADB_USER=PEPE
+      - MARIADB_DATABASE=DB_PEPE
+      - ALLOW_EMPTY_PASSWORD=yes
+    volumes:
+      - 'mariadb_data:/bitnami/mariadb'
+    networks:
+      redInterna:
+        ipv4_address: 192.168.80.12
+  prestashop:
+    container_name: prestashopPepe
+    image: docker.io/bitnami/prestashop:8
+    ports:
+      - '80:8080'
+      - '443:8443'
+    environment:
+      - PRESTASHOP_HOST=localhost
+      - PRESTASHOP_DATABASE_HOST=mariadbPepe
+      - PRESTASHOP_DATABASE_PORT_NUMBER=3306
+      - PRESTASHOP_DATABASE_USER=PEPE
+      - PRESTASHOP_DATABASE_PASSWORD=PEPE
+      - PRESTASHOP_DATABASE_NAME=DB_PEPE
+      - ALLOW_EMPTY_PASSWORD=yes
+    volumes:
+      - 'prestashop_data:/bitnami/prestashop'
+    depends_on:
+      - mariadb
+    networks:
+      redInterna:
+        ipv4_address: 192.168.80.10
+      redInternet:
+        ipv4_address: 192.168.88.180
+volumes:
+  mariadb_data:
+    driver: local
+  prestashop_data:
+    driver: local
+# Conectividad de los contenedores
+networks:
+    redInterna:
+        driver: bridge
+        ipam:
+          config:
+            - subnet: 192.168.80.0/24
+    redInternet:
+        driver: bridge
+        ipam:
+          config:
+            - subnet: 192.168.88.0/24
