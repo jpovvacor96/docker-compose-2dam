@@ -1,0 +1,80 @@
+# Versión del documento
+version: '2'
+services:
+  # Características del contenedor de mariadb
+  mariadb:
+    # Nombre del contenedor
+    container_name: palomino_db
+    # Nombre de host dentro de la red
+    hostname: palomino_db
+    # Nombre de la imagen utilizada
+    image: docker.io/bitnami/mariadb:11.1
+    # Persistencia de la información
+    volumes:
+      - 'mariadb_data:/bitnami/mariadb'
+    # Variables de entorno
+    environment:
+      # Contraseña de acceso de administrador al servidor
+      - MARIADB_ROOT_PASSWORD=palomino
+      # Nombre de usuario de acceso a la base de datos
+      - MARIADB_USER=palomino
+      # Contraseña de acceso a la base de datos
+      - MARIADB_PASSWORD=palomino
+      # Nombre de la base de datos
+      - MARIADB_DATABASE=palomino_mariadb
+    # Redes a las que se encuentra conectado el contenedor
+    networks:
+      conexionpalomino:
+        ipv4_address: 192.168.100.11
+  # Características del contenedor de redmine
+  redmine:
+    # Nombre del contenedor
+    container_name: palomino_redmine
+    # Nombre de host dentro de la red
+    hostname: palomino_redmine
+    # Nombre de la imagen utilizada
+    image: docker.io/bitnami/redmine:5
+    # Redireccionamiento de puertos
+    ports:
+      - '80:3000'
+    # Persistencia de la información
+    volumes:
+      - 'redmine_data:/bitnami/redmine'
+    # Contenedores de los que depende
+    depends_on:
+      - mariadb
+    # Variables de entorno
+    environment:
+      # Nombre de host del servidor de bases de datos
+      - REDMINE_DATABASE_HOST=palomino_db
+      # Puerto de conexión al servidor de bases de datos
+      - REDMINE_DATABASE_PORT_NUMBER=3306
+      # Nombre de usuario de acceso a la base de datos
+      - REDMINE_DATABASE_USER=palomino
+      # Contraseña de acceso a la base de datos
+      - REDMINE_DATABASE_PASSWORD=palomino
+      # Nombre de la base de datos
+      - REDMINE_DATABASE_NAME=palomino_mariadb
+      # Nombre de usuario de acceso al sistema
+      - REDMINE_USERNAME=palomino
+      # Contraseña de acceso al sistema
+      - REDMINE_PASSWORD=palomino
+    # Redes a las que se encuentra conectado el contenedor
+    networks:
+      conexionpalomino:
+        ipv4_address: 192.168.100.10
+# Persistencia de la información
+volumes:
+  # Volumen que guarda la información del servidor de bases de datos
+  mariadb_data:
+    driver: local
+  # Volumen que guarda la información del contenedor de redmine
+  redmine_data:
+    driver: local
+# Conectividad de los contenedores
+networks:
+  conexionpalomino:
+    driver: bridge
+    ipam:
+      config:         
+        - subnet: 192.168.100.0/24

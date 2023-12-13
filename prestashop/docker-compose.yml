@@ -1,57 +1,87 @@
-# Copyright VMware, Inc.
-# SPDX-License-Identifier: APACHE-2.0
-
+# Versión del documento
 version: '2'
 services:
+  # Características del contenedor de mariadb
   mariadb:
+    # Nombre del contenedor
     container_name: mariadbPepe
+    # Nombre de la imagen utilizada
     image: docker.io/bitnami/mariadb:11.1
+    # Variables de entorno
     environment:
+      # Contraseña de administrador
       - MARIADB_ROOT_PASSWORD=PEPE
+      # Contraseña de acceso a la base de datos
       - MARIADB_PASSWORD=PEPE
+      # Nombre de usuario de acceso a la base de datos
       - MARIADB_USER=PEPE
+      # Nombre de la base de datos
       - MARIADB_DATABASE=DB_PEPE
-      - ALLOW_EMPTY_PASSWORD=yes
+    # Persistencia de la información
     volumes:
       - 'mariadb_data:/bitnami/mariadb'
+    # Redes a las que se encuentra conectado el contenedor
     networks:
+      # Red interna con el servidor de bases de datos
       redInterna:
         ipv4_address: 192.168.80.12
+  # Características del contenedor de prestashop
   prestashop:
+    # Nombre del contenedor
     container_name: prestashopPepe
+    # Nombre de la imagen utilizada
     image: docker.io/bitnami/prestashop:8
+    # Redirección de puertos
     ports:
+      # Protocolo HTTP
       - '80:8080'
+      # Protocolo HTTPS
       - '443:8443'
+    # Variables de entorno
     environment:
+      # Nombre de host del servidor
       - PRESTASHOP_HOST=localhost
+      # Nombre de host del servidor de bases de datos
       - PRESTASHOP_DATABASE_HOST=mariadbPepe
+      # Puerto por el que acceder a la base de datos
       - PRESTASHOP_DATABASE_PORT_NUMBER=3306
+      # Nombre de usuario de acceso a la base de datos
       - PRESTASHOP_DATABASE_USER=PEPE
+      # Contraseña de usuario de acceso a la base de datos
       - PRESTASHOP_DATABASE_PASSWORD=PEPE
+      # Nombre de la base de datos
       - PRESTASHOP_DATABASE_NAME=DB_PEPE
-      - ALLOW_EMPTY_PASSWORD=yes
+    # Persistencia de la información
     volumes:
       - 'prestashop_data:/bitnami/prestashop'
+    # Contendores de los cuales depende
     depends_on:
       - mariadb
+    # Redes a las que se encuentra conectado el contenedor
     networks:
+      # Red interna con el servidor de bases de datos
       redInterna:
         ipv4_address: 192.168.80.10
+      # Red simulada de acceso a Internet
       redInternet:
         ipv4_address: 192.168.88.180
+#Persistencia de la información
 volumes:
+  # Volumen que guarda la información del servidor de bases de datos
   mariadb_data:
     driver: local
+  # Volumen que guarda la información de configuración de la tienda virtual
   prestashop_data:
     driver: local
 # Conectividad de los contenedores
 networks:
+    # Red interna entre la tienda virtual y el servidor de bases de datos
     redInterna:
         driver: bridge
         ipam:
           config:
             - subnet: 192.168.80.0/24
+    # Red simulada con acceso a internet
     redInternet:
         driver: bridge
         ipam:

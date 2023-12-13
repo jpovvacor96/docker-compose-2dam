@@ -1,0 +1,75 @@
+# Versión del documento
+version: '2'
+services:
+  # Características del contenedor de mariadb
+  db:
+    # Nombre del contenedor
+    container_name: mariadbPepe
+    # Nombre de host dentro de la red
+    hostname: mariadbPepe
+    # Nombre de la imagen utilizada
+    image: mariadb:10.6
+    # Reinicio del contenedor automático en caso de fallos
+    restart: always
+    # Configuraciones internas del servidor
+    command: --transaction-isolation=READ-COMMITTED --log-bin=binlog --binlog-format=ROW
+    # Persistencia de la información
+    volumes:
+      - db_data:/var/lib/mysql
+    # Variables de entorno
+    environment:
+      # Contraseña de administrador
+      - MYSQL_ROOT_PASSWORD=PEPE
+      # Contraseña de acceso a la base de datos
+      - MYSQL_PASSWORD=PEPE
+      # Nombre de la base de datos
+      - MYSQL_DATABASE=DB_PEPE
+      # Nombre de usuario de acceso a la base de datos
+      - MYSQL_USER=PEPE
+    # Redes a las que se encuentra conectado el contenedor
+    networks:
+      - redNextcloudPepe
+  # Características del contenedor de Nextcloud
+  app:
+    # Nombre del contenedor
+    container_name: nextcloudPepe
+    # Nombre de host dentro de la red
+    hostname: nextcloudPepe
+    # Nombre de la imagen utilizada
+    image: nextcloud
+    # Reinicio del contenedor automático en caso de fallos
+    restart: always
+    # Redirección de puertos
+    ports:
+      - 8080:80
+    # Persistencia de la información
+    volumes:
+      - nextcloud_data:/var/www/html
+    # Variables de entorno
+    environment:
+      # Contraseña de acceso a la base de datos
+      - MYSQL_PASSWORD=PEPE
+      # Nombre de la base de datos
+      - MYSQL_DATABASE=DB_PEPE
+      # Nombre de usuario de acceso a la base de datos
+      - MYSQL_USER=PEPE
+      # Nombre de host del servidor de bases de datos en la red
+      - MYSQL_HOST=mariadbPepe
+    # Contenedores de los que depende
+    depends_on:
+      - db
+    # Redes a las que se encuentra conectado el contenedor
+    networks:
+      - redNextcloudPepe
+# Persistencia de la información
+volumes:
+  # Volumen que guarda la información de Nextcloud
+  nextcloud_data:
+    driver: local
+  # Volumen que guarda la información del servidor de bases de datos
+  db_data:
+    driver: local
+# Conectividad de los contenedores
+networks:
+  redNextcloudPepe:
+    driver: bridge
