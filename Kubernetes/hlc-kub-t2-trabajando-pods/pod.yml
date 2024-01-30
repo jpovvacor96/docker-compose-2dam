@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Pod
+metadata:
+    name: webpepepod
+    labels:
+        app: test
+        service: web
+spec:
+    containers:
+        - image: iesgn/test_web:latest
+          name: testwebpepe
+          imagePullPolicy: Always
