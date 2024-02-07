@@ -1,0 +1,56 @@
+version: '3'
+
+services:
+  sonarqube:
+    image: sonarqube:community
+    depends_on:
+      - db
+    ports:
+      - "8080:9000"
+    networks:
+      - sonarnet
+    environment:
+      - SONAR_ES_BOOSTRAP_CHECKS_DISABLE=true
+      - SONAR_JDBC_URL=jdbc:postgresql://db:5432/sonar
+      - SONAR_JDBC_USERNAME=sonar
+      - SONAR_JDBC_PASSWORD=sonar
+    volumes:
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_extensions:/opt/sonarqube/extensions
+      - sonarqube_logs:/opt/sonarqube/logs
+  db:
+    image: postgres:12
+    networks:
+      - sonarnet
+    environment:
+      - POSTGRES_USER=sonar
+      - POSTGRES_PASSWORD=sonar
+    volumes:
+      - postgresql:/var/lib/postgresql
+      - postgresql_data:/var/lib/postgresql/data
+  jenkins:
+    image: jenkins/jenkins
+    ports:
+      - "8081:8080"
+      - "8082:50000"
+    environment:
+      - DOCKER_CERT_PATH=/certs/client
+      - DOCKER_TLS_VERIFY=1
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      - jenkins_docker_certs:/certs/client:ro
+    networks:
+      - sonarnet
+networks:
+  sonarnet:
+    driver: bridge
+
+volumes:
+  sonarqube_data:
+  sonarqube_extensions:
+  jenkins_home:
+  jenkins_docker_certs:
+  sonarqube_logs:
+  postgresql:
+  postgresql_data:
+  jenkins_home:
