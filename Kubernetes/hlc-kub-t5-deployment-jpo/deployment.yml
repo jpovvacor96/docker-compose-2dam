@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: deployment-test-web-jpo
+    labels:
+        app: test-web-jpo
+spec:
+    revisionHistoryLimit: 2
+    strategy:
+        type: RollingUpdate
+    replicas: 2
+    selector:
+        matchLabels:
+            app: test-web-jpo
+    template:
+        metadata:
+            labels:
+                app: test-web-jpo
+        spec:
+            containers:
+            - image: iesgn/test_web:latest
+              name: contenedor-test-web-jpo
+              ports:
+              - name: http
+                containerPort: 80
