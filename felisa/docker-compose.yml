@@ -1,0 +1,127 @@
+version: '3'
+services:
+
+    # Contenedor de Jenkins
+    jenkins:
+        image: jenkins/jenkins
+        ports:
+         - 8082:8080
+         - 50000:50000
+        container_name: jenkins
+        volumes:
+         - jenkins_home:/var/jenkins_home
+         # Para dar acceso al servidor de Docker externo
+         - /var/run/docker.sock:/var/run/docker.sock
+        networks:
+         - net
+
+    # Contenedor de SonarQube
+    sonarqube:
+        image: sonarqube:community
+        depends_on:
+         - dbsonarqube
+        ports:
+         - "8083:9000"
+        container_name: sonarqube
+        networks:
+         - net
+        environment:
+         - SONAR_ES_BOOSTRAP_CHECKS_DISABLE=true
+         # URL de la base de datos PostgreSQL
+         - SONAR_JDBC_URL=jdbc:postgresql://dbsonarqube:5432/sonar
+         # Nombre de usuario
+         - SONAR_JDBC_USERNAME=${SONAR_JDBC_USERNAME}
+         # Contraseña de acceso
+         - SONAR_JDBC_PASSWORD=/run/secrets/sonar_jdbc_password
+        volumes:
+         - sonarqube_data:/opt/sonarqube/data
+         - sonarqube_extensions:/opt/sonarqube/extensions
+         - sonarqube_logs:/opt/sonarqube/logs
+        secrets:
+         - sonar_jdbc_password
+    
+    # Base de datos que utiliza SonarQube
+    dbsonarqube:
+        image: postgres
+        container_name: dbsonarqube
+        networks:
+         - net
+        environment:
+         # Nombre de usuario de acceso
+         - POSTGRES_USER=${POSTGRES_USER}
+         # Contraseña de acceso
+         - POSTGRES_PASSWORD=/run/secrets/postgres_password
+        volumes:
+         - postgresql:/var/lib/postgresql
+         - postgresql_data:/var/lib/postgresql/data
+        secrets:
+         - postgres_password
+
+    # Base de datos mariadb
+    db:
+        image: mariadb
+        container_name: mariadb
+        networks:
+         - net
+        environment:
+         # Nombre de la base de datos de uso
+         - MYSQL_DATABASE=${MYSQL_DATABASE}
+         # Nombre de usuario de acceso
+         - MYSQL_USER=${MYSQL_USER}
+         # Contraseña de acceso
+         - MYSQL_PASSWORD=/run/secrets/mysql_password
+         # Contraseña de acceso del usuario administrador
+         - MYSQL_ROOT_PASSWORD=/run/secrets/mysql_root_password
+        volumes:
+         - db_data:/var/lib/mysql
+        secrets:
+         - mysql_password
+         - mysql_root_password
+         
+    # Interfaz web para gestionar el servidor de bases de datos mariadb
+    phpmyadmin:
+        image: phpmyadmin
+        container_name: phpmyadmin
+        ports:
+         - "8084:80"
+        networks:
+         - net
+        environment:
+         # Permite el acceso arbitrario al contenedor de mariadb
+         - PMA_ARBITRARY=1
+         
+# Definición de secretos que almacenan las contraseñas de acceso
+secrets:
+    # Contraseña de administrador al servidor de mariadb
+    mysql_root_password:
+        file: mysql_root_password.txt
+    # Cotraseña de acceso al servidor de mariadb
+    mysql_password:
+        file: mysql_password.txt
+    # Contraseña de acceso al servidor de PostgreSQL
+    postgres_password:
+        file: postgres_password.txt
+    #Contraseña de acceso al servidor de SonarQube
+    sonar_jdbc_password:
+        file: sonar_jdbc_password.txt
+
+# Red que une y conecta a todos los contenedores
+networks:
+    net:
+    
+# Volúmenes utilizados
+volumes:
+    # Contiene lo datos del servidor de mariadb
+    db_data:
+    # Contiene las configuraciones del servidor de PostgreSQL
+    postgresql:
+    # Contiene la información guardada en el servidor de PostgreSQL
+    postgresql_data:
+    # Guarda los logs de SonarQube
+    sonarqube_logs:
+    # Guarda los datos de las extensiones de SonarQube
+    sonarqube_extensions:
+    # Guarda los datos del servidor de SonarQube
+    sonarqube_data:
+    # Guarda los datos y configuraciones del servidor de Jenkins
+    jenkins_home:
