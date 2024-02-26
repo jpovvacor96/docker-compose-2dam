@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: guestbook-jpo
+  labels:
+    app: guestbook-jpo
+    tier: frontend
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: guestbook-jpo
+      tier: frontend
+  template:
+    metadata:
+      labels:
+        app: guestbook-jpo
+        tier: frontend
+    spec:
+      containers:
+      - name: contenedor-guestbook-jpo
+        image: iesgn/guestbook
+        ports:
+          - name: http-server
+            containerPort: 5000

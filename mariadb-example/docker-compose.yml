@@ -1,0 +1,12 @@
+version: '3'
+services:
+    db:
+        image: mariadb
+        container_name: mariadb
+        environment:
+         - MYSQL_DATABASE=mary_db
+         - MYSQL_USER=pepe
+         - MYSQL_PASSWORD=pepe
+         - MYSQL_ROOT_PASSWORD=pepe
+        volumes:
+         - ./db_data:/var/lib/mysql
