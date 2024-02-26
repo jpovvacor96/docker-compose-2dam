@@ -1,0 +1,27 @@
+version: '3.8'
+services:
+  # Contenedor de claves vault
+  vault:
+    image: hashicorp/vault:latest
+    container_name: vault
+    ports:
+      - "8200:8200"
+    restart: unless-stopped  
+    environment:
+      VAULT_DEV_ROOT_TOKEN_ID: "root"
+      VAULT_DEV_LISTEN_ADDRESS: "0.0.0.0:8200"
+    volumes:
+      - vault-data:/vault/file
+      - vault-config:/vault/config
+      - secrets:/secrets
+    cap_add:
+      - IPC_LOCK
+    networks:
+      - net
+networks:
+  net:
+
+volumes:
+  vault-data:
+  vault-config:
+  secrets:

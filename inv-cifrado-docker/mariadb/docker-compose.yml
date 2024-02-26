@@ -1,0 +1,34 @@
+version: '3.8'
+services:
+  # Base de datos mariadb
+  db:
+    image: mariadb
+    container_name: mariadb
+    networks:
+      - net
+    environment:
+      # Nombre de la base de datos de uso
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      # Nombre de usuario de acceso
+      - MYSQL_USER=${MYSQL_USER}
+      # Contraseña de acceso
+      - MYSQL_PASSWORD={{ with secret "mysql_credentials" }}{{ .Data.db_password }}{{ end }}
+      # Contraseña de acceso del usuario administrador
+      - MYSQL_ROOT_PASSWORD=root
+    volumes:
+      - db_data:/var/lib/mysql
+  # Interfaz web para gestionar el servidor de bases de datos mariadb
+  phpmyadmin:
+    image: phpmyadmin
+    container_name: phpmyadmin
+    ports:
+      - "8084:80"
+    networks:
+      - net
+    environment:
+      # Permite el acceso arbitrario al contenedor de mariadb
+      - PMA_ARBITRARY=1
+networks:
+  net:
+volumes:
+  db_data:
