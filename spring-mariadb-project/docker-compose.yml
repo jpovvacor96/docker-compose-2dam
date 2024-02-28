@@ -1,0 +1,25 @@
+version: '3'
+
+services:
+    # Base de datos mariadb
+    db:
+        image: mariadb
+        container_name: mariadb-products
+        ports:
+         - "8082:3306"
+        environment:
+         # Nombre de la base de datos de uso
+         - MARIADB_DATABASE=${MARIADB_DATABASE}
+         - MARIADB_ALLOW_EMPTY_ROOT_PASSWORD=true
+        volumes:
+         - C:\Users\Razgriz\Desktop\dev\data\dbproducts:/var/lib/mysql
+         - ./livestock.sql:/docker-entrypoint-initdb.d/livestock.sql
+    app:
+        build:
+            context: ./spring
+            dockerfile: ./Dockerfile
+        container_name: spring-products
+        ports:
+            - "8081:8081"
+        depends_on:
+            - db
