@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  # Contenedor de claves vault
+  vault:
+    image: hashicorp/vault:latest
+    container_name: vault
+    ports:
+      - "8200:8200"
+    restart: unless-stopped  
+    environment:
+      VAULT_DEV_ROOT_TOKEN_ID: "root"
+      VAULT_DEV_LISTEN_ADDRESS: "0.0.0.0:8200"
+    volumes:
+      - vault-data:/vault/file
+      - vault-config:/vault/config
+      - secrets:/secrets
+    cap_add:
+      - IPC_LOCK
+    networks:
+      - net
+  # Base de datos mariadb
+  db:
+    image: mariadb
+    container_name: mariadb
+    networks:
+      - net
+    environment:
+      - MYSQL_DATABASE=pepe
+      - MYSQL_USER=pepe
+      - MYSQL_PASSWORD=changeme
+      - MYSQL_ROOT_PASSWORD=changeme
+    volumes:
+      - db_data:/var/lib/mysql
+    depends_on:
+        - vault
+  # Interfaz web para gestionar el servidor de bases de datos mariadb
+  phpmyadmin:
+    image: phpmyadmin
+    container_name: phpmyadmin
+    ports:
+      - "8084:80"
+    networks:
+      - net
+    environment:
+      # Permite el acceso arbitrario al contenedor de mariadb
+      - PMA_ARBITRARY=1
+
+networks:
+  net:
+
+volumes:
+  vault-data:
+  vault-config:
+  db_data:
+  secrets:
+            
