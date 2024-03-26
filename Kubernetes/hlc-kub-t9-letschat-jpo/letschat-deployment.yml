@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deployment-letschat
+  labels:
+    app: lets-chat
+spec:
+  revisionHistoryLimit: 2
+  strategy:
+    type: RollingUpdate
+  replicas: 2
+  selector:
+    matchLabels:
+      app: lets-chat
+  template:
+    metadata:
+      labels:
+        app: lets-chat
+    spec:
+      containers:
+      - image: sdelements/lets-chat
+        name: contenedor-letschat
+        ports:
+          - name: http
+            containerPort: 8080
